@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatUCM - University Assistant</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom scrollbar for a cleaner look */
+        #chat-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        #chat-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        #chat-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        #chat-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        .prose-p:first-child {
+            margin-top: 0;
+        }
+        .prose-p:last-child {
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col h-screen">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md p-4 z-10">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-2xl font-bold text-gray-800">UCM Assistant</h1>
+            <p class="text-sm text-gray-500">Your guide to the University of Central Missouri</p>
+        </div>
+    </header>
+
+    <!-- Main Chat Container -->
+    <main class="flex-1 overflow-y-auto p-4" id="chat-container">
+        <div class="max-w-4xl mx-auto">
+            <!-- Initial Bot Message -->
+            <div class="flex justify-start mb-4">
+                <div class="bg-white rounded-lg p-3 max-w-lg shadow">
+                    <p class="text-gray-800">Hello! I'm the UCM Assistant. How can I help you today? Ask me anything about academics, admissions, or student life at UCM.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Fixed Input Form at the Bottom -->
+    <footer class="bg-white border-t p-4">
+        <div class="max-w-4xl mx-auto">
+            <form id="chat-form" class="flex items-center space-x-2">
+                <input type="text" id="question-input" class="flex-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Ask a question about UCM..." required autocomplete="off">
+                <button type="submit" id="submit-button" class="bg-red-700 text-white p-3 rounded-lg hover:bg-red-800 disabled:bg-red-300 flex items-center justify-center w-14 h-12">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-send"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </form>
+        </div>
+    </footer>
+
+    <!-- In chat/templates/index.html -->
+
+<script>
+    const chatContainer = document.getElementById('chat-container');
+    const chatForm = document.getElementById('chat-form');
+    const questionInput = document.getElementById('question-input');
+    const submitButton = document.getElementById('submit-button');
+
+    // --- NEW FUNCTION ---
+    // This function converts simple Markdown to HTML
+    function simpleMarkdownToHtml(text) {
+        // Convert **bold** text to <strong>
+        let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        
+        // Convert *italic* text to <em>
+        html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+        // Convert bullet points (* list item) to <li>
+        // The 'gm' flags are for global and multiline matching
+        html = html.replace(/^\* (.*$)/gm, '<li>$1</li>');
+
+        // Wrap list items in a <ul> tag
+        if (html.includes('<li>')) {
+            html = '<ul>' + html + '</ul>';
+        }
+
+        // Convert newlines to <br> tags (for paragraphs)
+        return html.replace(/\n/g, '<br>');
+    }
+
+    // Function to create and append a message bubble
+    function appendMessage(sender, message) {
+        const messageWrapper = document.createElement('div');
+        const messageBubble = document.createElement('div');
+        
+        // Sanitize message to prevent raw HTML injection before formatting
+        const sanitizedMessage = message.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        
+        // Convert Markdown to HTML
+        const formattedMessage = simpleMarkdownToHtml(sanitizedMessage);
+
+        messageBubble.classList.add('p-3', 'rounded-lg', 'shadow', 'max-w-lg');
+        
+        if (sender === 'user') {
+            messageWrapper.classList.add('flex', 'justify-end', 'mb-4');
+            messageBubble.classList.add('bg-red-700', 'text-white');
+            messageBubble.innerHTML = `<div class="prose prose-p:my-2">${formattedMessage.replace(/<br>/g, '')}</div>`; // Don't add extra breaks for user
+        } else {
+            messageWrapper.classList.add('flex', 'justify-start', 'mb-4');
+            messageBubble.classList.add('bg-white', 'text-gray-800');
+            if (message === '...') {
+                messageBubble.id = 'thinking-bubble';
+            }
+            messageBubble.innerHTML = `<div class="prose prose-p:my-2">${formattedMessage}</div>`;
+        }
+        
+        messageWrapper.appendChild(messageBubble);
+        chatContainer.querySelector('.max-w-4xl').appendChild(messageWrapper);
+        
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+        return messageBubble;
+    }
+
+    chatForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const question = questionInput.value.trim();
+        if (!question) return;
+
+        appendMessage('user', question);
+
+        questionInput.value = '';
+        questionInput.disabled = true;
+        submitButton.disabled = true;
+
+        appendMessage('bot', '...');
+
+        try {
+            const response = await fetch('/api/chat/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question: question })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            const thinkingBubble = document.getElementById('thinking-bubble');
+            if (thinkingBubble) {
+                // Convert the final bot response from Markdown to HTML
+                const formattedAnswer = simpleMarkdownToHtml(data.answer);
+                thinkingBubble.innerHTML = `<div class="prose prose-p:my-2">${formattedAnswer}</div>`;
+                thinkingBubble.id = '';
+            }
+
+        } catch (error) {
+            console.error("Error fetching bot response:", error);
+            const thinkingBubble = document.getElementById('thinking-bubble');
+            if (thinkingBubble) {
+                thinkingBubble.innerHTML = '<p class="text-red-500">Sorry, something went wrong. Please try again.</p>';
+                thinkingBubble.id = '';
+            }
+        } finally {
+            questionInput.disabled = false;
+            submitButton.disabled = false;
+            questionInput.focus();
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+    });
+</script>
+</body>
+</html>

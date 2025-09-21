@@ -1,5 +1,5 @@
 # In chat/chatbot_service.py
-
+# export GOOGLE_APPLICATION_CREDENTIALS="/Users/lokesh/Downloads/lithe-grid-466500-f5-fe71afdd8dd2.json"
 import os
 from dotenv import load_dotenv
 
@@ -13,12 +13,14 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
+from google.oauth2 import service_account
 
 # --- Configuration ---
 load_dotenv()
 CHROMA_DIR = "/Users/lokesh/Desktop/Folder/Test/ucmbot-refreshed/ucmo_chroma_store" # Make sure this path is correct
 EMBEDDING_MODEL = "text-embedding-3-large"
 LLM_MODEL = "gemini-1.5-pro"
+key_path = os.getenv("SERVICE_ACCOUNT_FILE")
 
 class ChatbotService:
     def __init__(self):
@@ -29,7 +31,9 @@ class ChatbotService:
     def _build_rag_chain(self):
         # 1. Initialize components
         embedding_function = OpenAIEmbeddings(model=EMBEDDING_MODEL)
-        llm = ChatGoogleGenerativeAI(model=LLM_MODEL, temperature=0.2)
+        # llm = ChatGoogleGenerativeAI(model=LLM_MODEL, temperature=0.2)
+        credentials = service_account.Credentials.from_service_account_file(key_path)
+        llm = ChatGoogleGenerativeAI(model=LLM_MODEL, temperature=0.2, credentials=credentials)
         
         # 2. Set up the base EnsembleRetriever for Hybrid Search
         vector_store = Chroma(

@@ -14,10 +14,11 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
 from google.oauth2 import service_account
+from django.conf import settings
 
 # --- Configuration ---
 load_dotenv()
-CHROMA_DIR = "/Users/lokesh/Desktop/Folder/Test/ucmbot-refreshed/ucmo_chroma_store" # Make sure this path is correct
+CHROMA_DIR = os.environ.get("CHROMA_DIR", "/app/ucmo_chroma_store")
 EMBEDDING_MODEL = "text-embedding-3-large"
 LLM_MODEL = "gemini-1.5-pro"
 key_path = os.getenv("SERVICE_ACCOUNT_FILE")

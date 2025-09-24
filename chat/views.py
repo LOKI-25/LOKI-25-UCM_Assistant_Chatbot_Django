@@ -6,11 +6,16 @@ from rest_framework import status
 # Import your service and new serializers
 from .chatbot_service import chatbot_instance
 from .serializers import QuestionSerializer, AnswerSerializer
+from django.http import HttpResponse
 
 # This view serves your HTML page (no change here)
 def index(request):
     return render(request, 'index.html')
 
+
+def health_check(request):
+    """A simple view that returns a 200 OK response."""
+    return HttpResponse("OK", status=200)
 
 class ChatAPIView(APIView):
     """

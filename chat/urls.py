@@ -6,4 +6,5 @@ urlpatterns = [
     path('', views.index, name='index'),
     # Point to the new ChatAPIView, using .as_view() for class-based views
     path('api/chat/', views.ChatAPIView.as_view(), name='chat_api'),
+    path('health/', views.health_check, name='health_check'),
 ]

@@ -1,4 +1,5 @@
 .env
+lithe-grid-466500-f5-fe71afdd8dd2.json
 env/
 venv/
 *.pyc
@@ -7,3 +8,7 @@ __pycache__/
 # Other common files
 .DS_Store
 db.sqlite3
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml

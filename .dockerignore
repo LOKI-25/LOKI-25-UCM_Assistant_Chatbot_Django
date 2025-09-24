@@ -1,0 +1,26 @@
+# .dockerignore
+
+# This file is for `docker build`. It keeps the image small and secure.
+
+# Ignore the large local vector store
+ucmo_chroma_store/
+
+# Ignore the virtual environment and Git files
+venv/
+.git/
+.gitignore
+
+# Ignore sensitive files
+.env
+
+# Ignore system files and caches
+.DS_Store
+__pycache__/
+*.pyc
+db.sqlite3
+
+# Ignore EB and Docker config files that don't need to be IN the image
+.elasticbeanstalk/
+.ebignore
+Dockerfile
+Dockerrun.aws.json

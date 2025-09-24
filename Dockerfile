@@ -20,10 +20,6 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy your non-secret Google credentials file
-COPY google-credentials.json /app/google-credentials.json
-ENV GOOGLE_APPLICATION_CREDENTIALS="/app/google-credentials.json"
-
 
 # 5. Copy your project code into the container
 COPY . /app/

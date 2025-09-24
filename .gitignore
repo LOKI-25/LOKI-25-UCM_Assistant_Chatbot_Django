@@ -8,6 +8,7 @@ __pycache__/
 # Other common files
 .DS_Store
 db.sqlite3
+ucmo_chroma_store/
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml

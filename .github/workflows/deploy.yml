@@ -1,0 +1,47 @@
+name: Build, Push, and Deploy to EC2
+
+on:
+  push:
+    branches: [ main ] # This pipeline runs on every push to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Check out your code from the repository
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Step 2: Configure your AWS credentials securely
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-2 # Your AWS region
+
+    # Step 3: Log in to Amazon ECR
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    # Step 4: Build the multi-platform image and push it to ECR
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: ${{ steps.login-ecr.outputs.registry }}/ucm-chatbot:latest
+        platforms: linux/amd64 # Build for your EC2 server's architecture
+
+    # Step 5: SSH into your EC2 and run the update script
+    - name: Deploy to EC2 instance
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          cd ucm-chatbot-deployment
+          ./update_app.sh

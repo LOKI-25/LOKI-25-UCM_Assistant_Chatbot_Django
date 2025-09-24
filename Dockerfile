@@ -10,18 +10,23 @@ ENV PYTHONUNBUFFERED 1
 # 3. Set the working directory in the container
 WORKDIR /app
 
-# 4. Copy the requirements file and install dependencies
+
+RUN apt-get update && apt-get install -y \
+    unzip \
+    awscli \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy and install Python-specific libraries
 COPY requirements.txt /app/
-RUN apt-get update && apt-get install -y unzip && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy your non-secret Google credentials file
+COPY google-credentials.json /app/google-credentials.json
+ENV GOOGLE_APPLICATION_CREDENTIALS="/app/google-credentials.json"
 
 
 # 5. Copy your project code into the container
 COPY . /app/
-
-# RUN chmod +x /app/entrypoint.sh
-
 
 # 6. Expose the port Django runs on
 EXPOSE 8000

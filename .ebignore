@@ -9,7 +9,7 @@ venv/
 
 # Ignore sensitive files
 .env
-lithe-grid-466500-f5-fe71afdd8dd2.json
+google-credentials.json
 Dockerfile
 
 # Ignore the large local vector store (it's pulled from S3 in production)

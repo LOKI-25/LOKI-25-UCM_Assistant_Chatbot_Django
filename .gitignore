@@ -1,5 +1,4 @@
 .env
-lithe-grid-466500-f5-fe71afdd8dd2.json
 env/
 venv/
 *.pyc
@@ -9,6 +8,7 @@ __pycache__/
 .DS_Store
 db.sqlite3
 ucmo_chroma_store/
+google-credentials.json
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml

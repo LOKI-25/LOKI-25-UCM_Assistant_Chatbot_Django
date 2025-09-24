@@ -15,11 +15,6 @@ COPY requirements.txt /app/
 RUN apt-get update && apt-get install -y unzip && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the non-secret credentials file
-COPY lithe-grid-466500-f5-fe71afdd8dd2.json /app/lithe-grid-466500-f5-fe71afdd8dd2.json
-
-# Set the non-secret environment variable for the file path
-ENV SERVICE_ACCOUNT_FILE="/app/lithe-grid-466500-f5-fe71afdd8dd2.json"
 
 
 # 5. Copy your project code into the container

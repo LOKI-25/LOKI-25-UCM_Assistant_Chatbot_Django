@@ -1,5 +1,5 @@
 # In chat/chatbot_service.py
-# export GOOGLE_APPLICATION_CREDENTIALS="/Users/lokesh/Downloads/lithe-grid-466500-f5-fe71afdd8dd2.json"
+# export GOOGLE_APPLICATION_CREDENTIALS="/Users/lokesh/Downloads/google-credentials.json"
 import os
 from dotenv import load_dotenv
 

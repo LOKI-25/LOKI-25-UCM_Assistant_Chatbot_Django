@@ -9,6 +9,7 @@ ucmo_chroma_store/
 venv/
 .git/
 .gitignore
+readme/
 
 # Ignore sensitive files
 .env

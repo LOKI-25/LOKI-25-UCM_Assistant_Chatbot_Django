@@ -20,7 +20,7 @@ from django.conf import settings
 load_dotenv()
 CHROMA_DIR = os.environ.get("CHROMA_DIR", "/app/ucmo_chroma_store")
 EMBEDDING_MODEL = "text-embedding-3-large"
-LLM_MODEL = "gemini-1.5-pro"
+LLM_MODEL = "gemini-2.5-flash"
 key_path = os.getenv("SERVICE_ACCOUNT_FILE")
 
 class ChatbotService:

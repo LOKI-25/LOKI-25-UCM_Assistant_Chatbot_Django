@@ -3,6 +3,7 @@ env/
 venv/
 *.pyc
 __pycache__/
+readme/
 
 # Other common files
 .DS_Store

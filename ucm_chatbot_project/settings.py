@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-x!m!$^ra)pfr7x0mw3)-2**=#-qq1=d-oomnj31&48g^+3u%5x
 DEBUG = True
 
 # Find the ALLOWED_HOSTS setting and replace it with this:
-ALLOWED_HOSTS_STRING = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1')
+ALLOWED_HOSTS_STRING = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,3.150.138.239')
 ALLOWED_HOSTS = ALLOWED_HOSTS_STRING.split(',')
 
 # --- IMPORTANT ---

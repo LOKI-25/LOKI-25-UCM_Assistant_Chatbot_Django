@@ -37,7 +37,6 @@ CSRF_TRUSTED_ORIGINS_STRING = os.getenv('CSRF_TRUSTED_ORIGINS', 'http://localhos
 CSRF_TRUSTED_ORIGINS = [origin.strip().strip("'\"") for origin in CSRF_TRUSTED_ORIGINS_STRING.split(',')]
 
 
-
 # Application definition
 
 INSTALLED_APPS = [

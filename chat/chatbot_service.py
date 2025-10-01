@@ -42,7 +42,7 @@ class ChatbotService:
             persist_directory=CHROMA_DIR,
             embedding_function=embedding_function
         )
-        vector_retriever = vector_store.as_retriever(search_kwargs={"k": 10})
+        vector_retriever = vector_store.as_retriever(search_kwargs={"k": 5})
         
         all_docs = vector_store.get(include=["metadatas", "documents"])
         all_chunks = [
@@ -50,7 +50,7 @@ class ChatbotService:
             for doc, meta in zip(all_docs['documents'], all_docs['metadatas'])
         ]
         bm25_retriever = BM25Retriever.from_documents(all_chunks)
-        bm25_retriever.k = 10
+        bm25_retriever.k = 5
 
         ensemble_retriever = EnsembleRetriever(
             retrievers=[bm25_retriever, vector_retriever],

@@ -142,12 +142,13 @@
             fullResponse += char;
             
             // For the animation, just append text. We'll format it at the end.
-            const liveText = fullResponse.replace(/\*\*/g, '').replace(/\*/g, '');
-            botBubble.innerText = liveText;
+            //const liveText = fullResponse.replace(/\*\*/g, '').replace(/\*/g, '');
+            //botBubble.innerText = liveText;
+            botBubble.innerHTML = simpleMarkdownToHtml(fullResponse);
             chatContainer.scrollTop = chatContainer.scrollHeight;
 
             // Schedule the next character to be typed
-            setTimeout(typeCharacter, 20); // Adjust typing speed (in ms)
+            setTimeout(typeCharacter, 10); // Adjust typing speed (in ms)
         }
 
         // This handler now just adds characters to a queue

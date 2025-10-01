@@ -57,6 +57,7 @@ class ChatbotService:
             weights=[0.5, 0.5]
         )
 
+
         # 3. Set up the MultiQueryRetriever
         multi_query_retriever = MultiQueryRetriever.from_llm(
             retriever=ensemble_retriever, llm=llm

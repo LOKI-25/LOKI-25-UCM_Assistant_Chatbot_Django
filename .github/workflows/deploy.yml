@@ -39,8 +39,8 @@ jobs:
         tags: ${{ steps.login-ecr.outputs.registry }}/ucm-chatbot:latest
         platforms: linux/amd64
         # These two lines enable the caching
-        cache-from: type=gha,scope=${{ github.workflow }}
-        cache-to: type=gha,mode=max,scope=${{ github.workflow }}
+        cache-from: type=gha,scope=build
+        cache-to: type=gha,mode=max,scope=build
 
     # Step 6: SSH into your EC2 and run the update script
     - name: Deploy to EC2 instance

@@ -26,16 +26,23 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
 
-    # Step 4: Build the multi-platform image and push it to ECR
+    # Step 4: Set up Docker Buildx for multi-platform and cached builds
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    # Step 5: Build and push the final image with caching
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
         context: .
         push: true
         tags: ${{ steps.login-ecr.outputs.registry }}/ucm-chatbot:latest
-        platforms: linux/amd64 # Build for your EC2 server's architecture
+        platforms: linux/amd64
+        # These two lines enable the caching
+        cache-from: type=gha,scope=${{ github.workflow }}
+        cache-to: type=gha,mode=max,scope=${{ github.workflow }}
 
-    # Step 5: SSH into your EC2 and run the update script
+    # Step 6: SSH into your EC2 and run the update script
     - name: Deploy to EC2 instance
       uses: appleboy/ssh-action@master
       with:

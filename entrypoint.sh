@@ -11,6 +11,8 @@ echo "Unzipping knowledge base..."
 unzip /app/ucmo_chroma_store.zip -d /app/
 
 # 3. Start the application server
-echo "Starting Gunicorn server..."
-gunicorn -c gunicorn.conf.py ucm_chatbot_project.wsgi:application
+# echo "Starting Gunicorn server..."
+# gunicorn -c gunicorn.conf.py ucm_chatbot_project.wsgi:application
 
+echo "Starting Uvicorn server..."
+uvicorn ucm_chatbot_project.asgi:application --host 0.0.0.0 --port 8000

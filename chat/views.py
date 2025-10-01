@@ -7,6 +7,8 @@ from rest_framework import status
 from .chatbot_service import chatbot_instance
 from .serializers import QuestionSerializer, AnswerSerializer
 from django.http import HttpResponse
+from django.http import StreamingHttpResponse, JsonResponse
+from rest_framework.decorators import api_view
 
 # This view serves your HTML page (no change here)
 def index(request):
@@ -40,3 +42,29 @@ class ChatAPIView(APIView):
         
         # If validation fails, return a 400 Bad Request with the errors
         return Response(question_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+async def chat_api_stream(request):
+    """
+    An asynchronous view that streams the chatbot's response using Server-Sent Events (SSE).
+    """
+    if request.method == "GET":
+        try:
+            # We manually parse the JSON here instead of using a DRF serializer
+            question = request.GET.get("question")
+
+            if not question:
+                return JsonResponse({"error": "No question provided"}, status=400)
+
+            # Return a streaming response that calls our new async service method
+            return StreamingHttpResponse(
+                chatbot_instance.ask_question_stream(question),
+                content_type="text/event-stream"
+            )
+        except Exception as e:
+            # Handle potential errors during streaming
+            print(f"Error during stream: {e}")
+            # Note: We can't send a JSON error in the middle of a stream, but this handles initial setup errors.
+            return JsonResponse({"error": str(e)}, status=500)
+    
+    return JsonResponse({"error": "Only GET requests are allowed"}, status=405)

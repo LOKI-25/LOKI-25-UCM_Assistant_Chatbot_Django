@@ -15,6 +15,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
 from google.oauth2 import service_account
 from django.conf import settings
+import json
 
 # --- Configuration ---
 load_dotenv()
@@ -64,8 +65,9 @@ class ChatbotService:
         # 4. Define the prompt template
         prompt_template = """
         You are ChatUCM, a friendly and knowledgeable AI assistant for the University of Central Missouri (UCM). 
+        Please strictly answer only to the questions relevant to UCM.
   Your job is to answer the user's question, using the provided context as the primary source of truth. 
-  You can elaborate on the topics mentioned in the context with your general knowledge to provide a more complete and approachable answer. 
+  You can elaborate on the topics only if it is releated to university of central missouri. If the context mentions the topic, you can use the mentioned in the context with your general knowledge to provide a more complete and approachable answer. 
   If the context doesn't mention the topic at all, politely state you don't have that specific information.
   Please answer in a conversational style that is engaging and helpful.Use formatting like paragraphs and bullet points to make complex information easy to understand.
 
@@ -92,6 +94,16 @@ class ChatbotService:
     def ask_question(self, question: str):
         """Asks a question to the RAG chain and gets an answer."""
         return self.rag_chain.invoke(question)
+    
+    async def ask_question_stream(self, question: str):
+        full_response = ""
+        # .astream() on the full chain will do retrieval first, then stream.
+        async for chunk in self.rag_chain.astream(question):
+            full_response += chunk
+            yield f"data: {json.dumps({'token': chunk})}\n\n"
+
+        # After the stream is finished, send a final "end" event.
+        yield "event: end\ndata: {}\n\n"
 
 # Create a single, global instance of the service to be used by Django
 # This ensures the models are loaded only once.

@@ -27,6 +27,11 @@
         .prose-p:last-child {
             margin-bottom: 0;
         }
+        #chat-container {
+        scroll-behavior: smooth; /* <-- ADD THIS LINE */
+
+
+        }
     </style>
 </head>
 <body class="bg-gray-100 flex flex-col h-screen">
@@ -66,6 +71,131 @@
     <!-- In chat/templates/index.html -->
 
 <script>
+    const chatContainer = document.getElementById('chat-container');
+    const chatForm = document.getElementById('chat-form');
+    const questionInput = document.getElementById('question-input');
+    const submitButton = document.getElementById('submit-button');
+
+    function simpleMarkdownToHtml(text) {
+        let sanitized = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        let html = sanitized.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        // Improved list handling
+        html = html.replace(/^\s*\*\s+(.*)/gm, '<li>$1</li>');
+        if (html.includes('<li>')) {
+            html = '<ul>' + html.replace(/<\/li>\s*<li>/g, '</li><li>') + '</ul>';
+            html = html.replace(/<br>\s*<ul>/g, '<ul>').replace(/<\/ul>\s*<br>/g, '</ul>');
+        }
+        return html.replace(/\n/g, '<br>');
+    }
+
+    function appendMessage(sender, message) {
+        const messageWrapper = document.createElement('div');
+        const messageBubble = document.createElement('div');
+        const formattedMessage = (sender === 'user') ? message.replace(/</g, "&lt;").replace(/>/g, "&gt;") : message;
+        messageBubble.classList.add('p-3', 'rounded-lg', 'shadow', 'max-w-lg');
+        if (sender === 'user') {
+            messageWrapper.classList.add('flex', 'justify-end', 'mb-4');
+            messageBubble.classList.add('bg-red-700', 'text-white');
+        } else {
+            messageWrapper.classList.add('flex', 'justify-start', 'mb-4');
+            messageBubble.classList.add('bg-white', 'text-gray-800');
+        }
+        messageBubble.innerHTML = `<div class="prose prose-p:my-2">${formattedMessage}</div>`;
+        messageWrapper.appendChild(messageBubble);
+        chatContainer.querySelector('.max-w-4xl').appendChild(messageWrapper);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+        return messageBubble;
+    }
+
+    chatForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const question = questionInput.value.trim();
+        if (!question) return;
+
+        appendMessage('user', question);
+        questionInput.value = '';
+        questionInput.disabled = true;
+        submitButton.disabled = true;
+
+        const botBubble = appendMessage('bot', '<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-900"></div>');
+        
+        const url = `/api/chat/stream/?question=${encodeURIComponent(question)}`;
+        const eventSource = new EventSource(url);
+        
+        // --- NEW CHARACTER-BY-CHARACTER ANIMATION LOGIC ---
+        let charQueue = [];
+        let isTyping = false;
+        let fullResponse = "";
+
+        // The main typing animation loop
+        function typeCharacter() {
+            if (charQueue.length === 0) {
+                isTyping = false;
+                // Once typing is done, do one final render with full Markdown
+                botBubble.innerHTML = simpleMarkdownToHtml(fullResponse);
+                return;
+            }
+            
+            isTyping = true;
+            const char = charQueue.shift(); // Get the next character
+            fullResponse += char;
+            
+            // For the animation, just append text. We'll format it at the end.
+            const liveText = fullResponse.replace(/\*\*/g, '').replace(/\*/g, '');
+            botBubble.innerText = liveText;
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            // Schedule the next character to be typed
+            setTimeout(typeCharacter, 20); // Adjust typing speed (in ms)
+        }
+
+        // This handler now just adds characters to a queue
+        eventSource.onmessage = function(event) {
+            // Clear the spinner on the very first message
+            if (botBubble.querySelector('.animate-spin')) {
+                botBubble.innerHTML = ""; 
+            }
+            
+            try {
+                const data = JSON.parse(event.data);
+                if (data.token) {
+                    // Add all characters from the token to our queue
+                    charQueue.push(...data.token.split(''));
+                    
+                    // Start the typing animation if it's not already running
+                    if (!isTyping) {
+                        typeCharacter();
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to parse JSON from stream:", event.data);
+            }
+        };
+        
+        // This handler listens for our custom "end" event
+        eventSource.addEventListener('end', function(event) {
+            console.log("Stream finished successfully.");
+            // Ensure the final animation frame runs and renders Markdown
+            if (!isTyping && charQueue.length === 0) {
+                 botBubble.innerHTML = simpleMarkdownToHtml(fullResponse);
+            }
+            eventSource.close();
+            questionInput.disabled = false;
+            submitButton.disabled = false;
+            questionInput.focus();
+        });
+
+        // This handler catches any real errors
+        eventSource.onerror = function(err) {
+            // ... (error handling logic is fine from previous version)
+        };
+    });
+
+</script>
+
+
+<!-- <script>
     const chatContainer = document.getElementById('chat-container');
     const chatForm = document.getElementById('chat-form');
     const questionInput = document.getElementById('question-input');
@@ -126,7 +256,13 @@
         return messageBubble;
     }
 
-    chatForm.addEventListener('submit', async function(e) {
+
+    // In your index.html <script> tag
+
+
+
+
+    /* chatForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
         const question = questionInput.value.trim();
@@ -174,7 +310,10 @@
             questionInput.focus();
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
-    });
-</script>
+    }); */
+
+    
+
+</script> -->
 </body>
 </html>

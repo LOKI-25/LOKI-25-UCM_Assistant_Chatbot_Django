@@ -30,14 +30,12 @@ DEBUG = True
 ALLOWED_HOSTS_STRING = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,3.150.138.239')
 ALLOWED_HOSTS = [host.strip().strip("'\"") for host in ALLOWED_HOSTS_STRING.split(',')]
 
-print("ALLOWED_HOSTS:", ALLOWED_HOSTS)
 
 # --- IMPORTANT ---
 # When you deploy to AWS, you'll need this for security
 CSRF_TRUSTED_ORIGINS_STRING = os.getenv('CSRF_TRUSTED_ORIGINS', 'http://localhost:8000,http://127.0.0.1:8000')
 CSRF_TRUSTED_ORIGINS = [origin.strip().strip("'\"") for origin in CSRF_TRUSTED_ORIGINS_STRING.split(',')]
 
-print("CSRF_TRUSTED_ORIGINS:", CSRF_TRUSTED_ORIGINS)
 
 
 # Application definition
